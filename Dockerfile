@@ -19,5 +19,9 @@ ENV PORT=4321
 # Expose the port your app runs on
 EXPOSE 4321
 
-# Command to run your app
-CMD node ./dist/server/entry.mjs
+# Production image, copy all the files and run nginx
+FROM nginx:alpine AS runner
+COPY ./config/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+WORKDIR /usr/share/nginx/html
