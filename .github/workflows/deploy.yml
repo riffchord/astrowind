@@ -1,0 +1,31 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H 62.72.23.52 >> ~/.ssh/known_hosts
+
+    - name: Deploy via SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no -p 22 root@62.72.23.52 << 'EOF'
+          cd /web/astrowind
+          git pull
+          docker buildx build -t astronew .
+          docker stop astronew || true
+          docker rm astronew || true
+          docker run -d --name astronew -p 4321:4321 astronew
+        EOF
