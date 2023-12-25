@@ -22,7 +22,7 @@ jobs:
     - name: Deploy via SSH
       run: |
         ssh -o StrictHostKeyChecking=no -p 22 root@62.72.23.52 << 'EOF'
-          cd /web/astrowind
+          cd web/astrowind
           git pull
           docker buildx build -t astronew .
           docker stop astronew || true
